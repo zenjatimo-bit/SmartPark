@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SmartPark • Beograd</title>
+
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="page center">
+<div class="glass loginCard">
+<div class="topBrand">
+<div class="brandLogo">SP</div>
+<div>
+<div class="brandName">SmartPark</div>
+<div class="brandCity">BEOGRAD</div>
+</div>
+</div>
+
+<h1 class="loginTitle">Prijava</h1>
+<p class="muted">Demo: <b>student.student</b> / <b>student.student</b></p>
+
+<label class="field">
+<span>Korisničko ime</span>
+<input id="loginUser" type="text" placeholder="student.student" autocomplete="username"/>
+</label>
+
+<label class="field">
+<span>Šifra</span>
+<input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+</label>
+
+<button id="loginBtn" class="btn primary" type="button">Uloguj se</button>
+<div id="loginError" class="msg error hidden"></div>
+
+<div class="divider"></div>
+
+<div class="smallRow">
+<div class="muted tiny">Premium otključava “divlja” mesta (demo plaćanje).</div>
+</div>
+</div>
+</div>
+
+<!-- APP PAGE -->
+<div id="appPage" class="page hidden">
+<div class="appShell">
+
+<!-- TOP BAR -->
+<div class="topbar glass">
+<div class="topLeft">
+<div class="brandInline">
+<div class="brandLogo sm">SP</div>
+<div class="brandName sm">SmartPark</div>
+<div class="pillCity">BEOGRAD</div>
+</div>
+</div>
+
+<div class="topRight">
+<div class="liveDot"><span></span> <b id="topFree">0</b>&nbsp;slobodnih mesta</div>
+<div id="premiumPill" class="pillPremium hidden">⭐ PREMIUM</div>
+<button id="premiumBtn" class="btn ghost" type="button">Premium</button>
+<button id="logoutBtn" class="btn ghost" type="button">Odjava</button>
+</div>
+</div>
+
+<!-- HERO -->
+<div class="hero glass">
+<div class="heroBg"></div>
+
+<div class="heroContent">
+<div class="heroTitle">
+Nađi parking u <span>Beogradu</span>
+</div>
+<div class="heroSub">
+Rezervišite slobodno parking mesto u realnom vremenu • brzo, jednostavno, digitalno.
+</div>
+
+<div class="statsRow glass2">
+<div class="statItem">
+<div class="statNum green" id="statFree">0</div>
+<div class="statLbl">Slobodna mesta</div>
+</div>
+<div class="statItem">
+<div class="statNum" id="statTotal">2855</div>
+<div class="statLbl">Ukupna mesta</div>
+</div>
+<div class="statItem">
+<div class="statNum" id="statZones">11</div>
+<div class="statLbl">Aktivnih zona</div>
+</div>
+<div class="statItem">
+<div class="statNum cyan" id="statInSys">12</div>
+<div class="statLbl">Parkinga u sistemu</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls glass">
+<div class="searchWrap">
+<span class="ico">🔎</span>
+<input id="searchInput" class="search" type="text" placeholder="Pretraži parking lokacije..."/>
+</div>
+
+<div class="selectWrap">
+<span class="ico">📍</span>
+<select id="municipalitySelect">
+<option value="all">Sve opštine</option>
+</select>
+</div>
+
+<div class="tabs">
+<button class="tab active" data-filter="all" type="button">Svi</button>
+<button class="tab" data-filter="free" type="button">Slobodni</button>
+<button class="tab" data-filter="limited" type="button">Ograničeni</button>
+<button class="tab" data-filter="full" type="button">Popunjeni</button>
+</div>
+
+<div class="viewToggle">
+<button id="listViewBtn" class="pillBtn active" type="button">☰ Lista</button>
+<button id="mapViewBtn" class="pillBtn" type="button">🗺️ Mapa</button>
+</div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+<!-- LIST -->
+<div id="listView" class="listView">
+<div class="listMeta muted tiny">
+Prikazuje <b id="shownCount">0</b> parking lokacija
+</div>
+<div id="cards" class="cards"></div>
+</div>
+
+<!-- MAP -->
+<div id="mapView" class="mapView hidden glass">
+<div class="mapTop">
+<div class="muted tiny">Mapa • klikni marker za detalje</div>
+<div class="mapBtns">
+<button id="centerBtn" class="btn ghost" type="button">🎯 Centar</button>
+<button id="nearBtn" class="btn ghost" type="button">📍 Blizu mene</button>
+</div>
+</div>
+<div id="map"></div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- PREMIUM MODAL -->
+<div id="premiumModal" class="modal hidden">
+<div class="backdrop"></div>
+<div class="modalCard glass">
+<div class="modalHead">
+<div>
+<div class="modalTitle">Premium članstvo</div>
+<div class="muted tiny">Otključava “divlja” mesta + prioritet</div>
+</div>
+<button id="premiumClose" class="xBtn" type="button">✕</button>
+</div>
+
+<div class="plans">
+<button class="plan active" data-plan="monthly" type="button">
+<div><b>Monthly</b><div class="muted tiny">Auto obnova (demo)</div></div>
+<div class="price">499 RSD</div>
+</button>
+<button class="plan" data-plan="yearly" type="button">
+<div><b>Yearly</b><div class="muted tiny">Ušteda 30% (demo)</div></div>
+<div class="price">3999 RSD</div>
+</button>
+</div>
+
+<div class="perks">
+<div class="perk">🗺️ Divlja mesta</div>
+<div class="perk">⚡ Prioritet</div>
+<div class="perk">🔔 Notifikacije (demo)</div>
+<div class="perk">🎟️ Popusti (demo)</div>
+</div>
+
+<div class="grid2">
+<label class="field">
+<span>Ime na kartici</span>
+<input id="cardName" type="text" placeholder="Student Student"/>
+</label>
+<label class="field">
+<span>Broj kartice</span>
+<input id="cardNum" type="text" inputmode="numeric" placeholder="1234 5678 9012 3456"/>
+</label>
+</div>
+
+<button id="premiumPay" class="btn primary" type="button">Aktiviraj Premium (demo)</button>
+<div id="premiumMsg" class="msg info hidden"></div>
+</div>
+</div>
+
+<!-- RESERVATION MODAL -->
+<div id="reserveModal" class="modal hidden">
+<div class="backdrop"></div>
+<div class="modalCard glass wide">
+<div class="modalHead">
+<div>
+<div id="resTitle" class="modalTitle">Rezervacija</div>
+<div class="muted tiny" id="resMeta">—</div>
+</div>
+<button id="resClose" class="xBtn" type="button">✕</button>
+</div>
+
+<div class="seatWrap glass2">
+<div class="muted tiny">Izaberite mesto (pregled)</div>
+<div id="seatGrid" class="seatGrid"></div>
+</div>
+
+<div class="resForm">
+<div class="muted tiny">Trajanje</div>
+<div class="durRow" id="durRow">
+<button class="dur active" data-h="1" type="button">1h</button>
+<button class="dur" data-h="2" type="button">2h</button>
+<button class="dur" data-h="3" type="button">3h</button>
+<button class="dur" data-h="4" type="button">4h</button>
+<button class="dur" data-h="6" type="button">6h</button>
+<button class="dur" data-h="8" type="button">8h</button>
+<button class="dur" data-h="12" type="button">12h</button>
+<button class="dur" data-h="24" type="button">24h</button>
+</div>
+
+<label class="field">
+<span>Registrarski broj vozila</span>
+<input id="plateInput" type="text" placeholder="npr. BG-123-AB"/>
+</label>
+
+<div class="payRow">
+<div class="muted tiny">
+Ukupno za <b id="hoursTxt">1h</b>
+</div>
+<div class="totalPrice"><span id="totalPrice">0</span> RSD</div>
+<button id="reserveBtn" class="btn primary" type="button">Rezerviši</button>
+</div>
+
+<div id="resWarn" class="msg warning hidden"></div>
+</div>
+</div>
+</div>
+
+<!-- CONFIRM PAY MODAL -->
+<div id="confirmModal" class="modal hidden">
+<div class="backdrop"></div>
+<div class="modalCard glass">
+<div class="modalHead">
+<div>
+<div class="modalTitle">Potvrda rezervacije</div>
+<div class="muted tiny">Proverite detalje pre plaćanja</div>
+</div>
+<button id="confirmClose" class="xBtn" type="button">✕</button>
+</div>
+
+<div class="confirmBox glass2">
+<div class="cRow"><span class="muted tiny">Lokacija</span><b id="cLoc">—</b></div>
+<div class="cRow"><span class="muted tiny">Adresa</span><b id="cAddr">—</b></div>
+<div class="cRow"><span class="muted tiny">Trajanje</span><b id="cDur">—</b></div>
+<div class="cRow"><span class="muted tiny">Registracija</span><b id="cPlate">—</b></div>
+<div class="cRow"><span class="muted tiny">Ukupno</span><b class="cyan" id="cTotal">—</b></div>
+</div>
+
+<div class="confirmBtns">
+<button id="confirmBack" class="btn ghost" type="button">Nazad</button>
+<button id="confirmPay" class="btn primary" type="button">Plati <span id="payBtnTxt">0</span> RSD</button>
+</div>
+</div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
